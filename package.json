@@ -1,0 +1,58 @@
+{
+  "name": "overlays",
+  "version": "1.0.0-alpha.3",
+  "description": "",
+  "author": "Morris Allison III <author@morris.xyz> (http://morris.xyz)",
+  "homepage": "https://github.com/morrisallison/overlays#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/morrisallison/overlays.git"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "lint": "eslint --ext .ts,.tsx ./src",
+    "clean": "rm -rf ./lib"
+  },
+  "bugs": {
+    "url": "https://github.com/morrisallison/overlays/issues"
+  },
+  "keywords": [
+    "react"
+  ],
+  "files": [
+    "lib"
+  ],
+  "peerDependencies": {
+    "react": "^16.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-syntax-jsx": "^7.2.0",
+    "@babel/register": "^7.4.4",
+    "@types/next-tick": "^1.0.0",
+    "@types/react": "^16.8.17",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "babel-eslint": "9.x",
+    "eslint": "5.x",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-config-react-app": "^3.0.8",
+    "eslint-plugin-flowtype": "2.x",
+    "eslint-plugin-import": "2.x",
+    "eslint-plugin-jsx-a11y": "6.x",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "7.x",
+    "prettier": "^1.16.4",
+    "react": "^16.8.6",
+    "tap": "^12.6.1",
+    "typescript": "^3.4.5"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "dependencies": {
+    "next-tick": "^1.0.0"
+  }
+}
