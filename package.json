@@ -1,6 +1,6 @@
 {
   "name": "overlays",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-beta",
   "description": "",
   "author": "Morris Allison III <author@morris.xyz> (http://morris.xyz)",
   "homepage": "https://github.com/morrisallison/overlays#readme",
@@ -47,7 +47,7 @@
     "prettier": "^1.16.4",
     "react": "^16.8.6",
     "tap": "^12.6.1",
-    "typescript": "^3.4.5"
+    "typescript": "^3.9.0-beta"
   },
   "engines": {
     "node": ">=7.6.0"

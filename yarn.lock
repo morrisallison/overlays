@@ -2233,9 +2233,14 @@ type-check@~0.3.2:
   dependencies:
     prelude-ls "~1.1.2"
 
-typescript@^3.3.3, typescript@^3.4.5:
+typescript@^3.3.3:
   version "3.4.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
+
+typescript@^3.9.0-beta:
+  version "3.9.0-dev.20200426"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.0-dev.20200426.tgz#096b132fe7bb25432c3d2220c64289db18d80caf"
+  integrity sha512-0MRHJbVaaQ0W2pwC1v1Z5u2ucgvXC6nV6tIMZDgRCgwn1Rv+kB/lVMaXPw86Ug+bvrAr+IHprlRTPB56JqYRvA==
 
 uglify-js@^3.1.4:
   version "3.5.12"
