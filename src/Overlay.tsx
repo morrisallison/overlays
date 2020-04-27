@@ -11,15 +11,11 @@ export class Overlay extends PureComponent<Props> {
   static contextType = ContentContext;
 
   context!: React.ContextType<typeof ContentContext>;
-  renderer?: Renderer;
 
-  componentWillUnmount() {
-    if (this.renderer) {
-      this.renderer.destroy();
-    }
-  }
+  private renderer?: Renderer;
+  private shouldRender = true;
 
-  getRenderer() {
+  private getRenderer() {
     const { renderer } = this;
 
     if (renderer) return renderer;
@@ -31,8 +27,19 @@ export class Overlay extends PureComponent<Props> {
     return newRenderer;
   }
 
+  componentWillUnmount() {
+    this.shouldRender = false;
+
+    if (this.renderer) {
+      this.renderer.destroy();
+      delete this.renderer;
+    }
+  }
+
   render() {
-    this.getRenderer().render(this.props.children);
+    if (this.shouldRender) {
+      this.getRenderer().render(this.props.children);
+    }
 
     return null;
   }

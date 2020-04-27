@@ -5,35 +5,53 @@ import { RootContext, ContentContext } from "./context";
 
 const DEFAULT_SCOPE = "@@OVERLAYS";
 
-let idCounter = 0;
-
 type Content = Map<ContentId, ReactNode>;
 type ContentId = number;
 
 export class OverlayProvider extends PureComponent {
-  content: Record<string, Content | void> = {};
+  private idCounter = 0;
+  private content: Record<string, Content | void> = {};
 
   state = {
     contentContext: this.createContentContext(),
     rootContext: this.createRootContext()
   };
 
-  createRenderer = (scope?: string) => {
-    const id = ++idCounter;
-    const renderer = {
-      render: (content: ReactNode) => {
-        this.getScopedContent(scope).set(id, content);
-        nextTick(() => this.updateRootContext());
-      },
-      destroy: () => {
-        this.getScopedContent(scope).delete(id);
-      }
+  private renderNode(
+    scope: string | undefined,
+    id: number,
+    content: ReactNode,
+    callback?: () => void
+  ) {
+    this.getScopedContent(scope).set(id, content);
+    nextTick(() => this.updateRootContext(callback));
+  }
+
+  private createRenderer = (scope?: string) => {
+    const id = ++this.idCounter;
+
+    let isDestroyed = false;
+
+    const render = (content: ReactNode) => {
+      if (isDestroyed) return;
+
+      this.renderNode(scope, id, content);
     };
 
-    return renderer;
+    const destroy = () => {
+      if (isDestroyed) return;
+
+      isDestroyed = true;
+
+      this.renderNode(scope, id, null, () => {
+        this.getScopedContent(scope).delete(id);
+      });
+    };
+
+    return { render, destroy };
   };
 
-  getScopedContent(scope: string = DEFAULT_SCOPE) {
+  private getScopedContent(scope: string = DEFAULT_SCOPE) {
     const scopedContent = this.content[scope];
 
     if (scopedContent) return scopedContent;
@@ -45,26 +63,29 @@ export class OverlayProvider extends PureComponent {
     return newScopedContent;
   }
 
-  renderContent = (scope?: string) => {
+  private renderContent = (scope?: string) => {
     return Array.from(this.getScopedContent(scope).values());
   };
 
-  createContentContext() {
+  private createContentContext() {
     return () => ({
       createRenderer: this.createRenderer
     });
   }
 
-  createRootContext() {
+  private createRootContext() {
     return () => ({
       renderContent: this.renderContent
     });
   }
 
-  updateRootContext() {
-    this.setState({
-      rootContext: this.createRootContext()
-    });
+  private updateRootContext(callback?: () => void) {
+    this.setState(
+      {
+        rootContext: this.createRootContext()
+      },
+      callback
+    );
   }
 
   render() {
