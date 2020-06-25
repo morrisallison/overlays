@@ -12,12 +12,13 @@
 
 ## Overview
 
-Upgrade Dependents will discover and upgrade all compatible dependents within a directory.
+Overlays is a simple library that facilitates the creation of overlays in React without using portals.
 
 #### Features
 
 * Simple, easy to use API
 * Doesn't require React portals
+* CSS agnostic
 
 ## Usage
 
