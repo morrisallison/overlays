@@ -1,6 +1,6 @@
 {
   "name": "overlays",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React library for rendering overlays.",
   "author": "Morris Allison III <author@morris.xyz> (http://morris.xyz)",
   "homepage": "https://github.com/morrisallison/overlays#readme",
