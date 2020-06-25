@@ -1,9 +1,10 @@
-import React, { PureComponent } from "react";
+import React, { isValidElement, PureComponent, ReactElement } from "react";
 
 import { ContentContext } from "./context";
 import { Renderer } from "./types";
 
 type Props = {
+  children?: ReactElement | null;
   scope?: string;
 };
 
@@ -37,8 +38,22 @@ export class Overlay extends PureComponent<Props> {
   }
 
   render() {
+    const { children } = this.props;
+
+    if (children !== null) {
+      if (!isValidElement(children)) {
+        throw new Error("[overlays] Invalid node type.");
+      }
+
+      if (!children.key) {
+        console.warn(
+          "[overlays] An overlay node is missing a key. Overlay nodes are rendered from arrays, so each node should have a key."
+        );
+      }
+    }
+
     if (this.shouldRender) {
-      this.getRenderer().render(this.props.children);
+      this.getRenderer().render(children);
     }
 
     return null;
