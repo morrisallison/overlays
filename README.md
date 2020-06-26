@@ -33,7 +33,7 @@ function MyHomePage() {
         <section>
           <p>Page content</p>
           <Overlay>
-            <p>Overlay content</p>
+            <p key="myOverlay">Overlay content</p>
           </Overlay>
         </section>
         <OverlayRoot />
@@ -53,10 +53,10 @@ function MyAboutPage() {
             <p>Modal content</p>
           </Overlay>
           <Overlay scope="alert">
-            <p>First alert</p>
+            <p key="first">First alert</p>
           </Overlay>
           <Overlay scope="alert">
-            <p>Second alert</p>
+            <p key="second">Second alert</p>
           </Overlay>
         </section>
         <OverlayRoot scope="modal" />
