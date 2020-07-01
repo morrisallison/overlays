@@ -1,61 +1,41 @@
-import React, { isValidElement, PureComponent, ReactElement } from "react";
+import React, {
+  Fragment,
+  ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef
+} from "react";
 
 import { ContentContext } from "./context";
-import { Renderer } from "./types";
 
 type Props = {
   children?: ReactElement | null;
+  id: string;
   scope?: string;
 };
 
-export class Overlay extends PureComponent<Props> {
-  static contextType = ContentContext;
+export function Overlay(props: Props) {
+  const { children, id, scope } = props;
+  const contentContext = useContext(ContentContext);
+  const shouldRender = useRef(true);
+  const renderer = useMemo(() => contentContext().createRenderer(id, scope), [
+    contentContext,
+    id,
+    scope
+  ]);
 
-  context!: React.ContextType<typeof ContentContext>;
+  useEffect(() => () => renderer.destroy(), [renderer]);
+  useEffect(
+    () => () => {
+      shouldRender.current = false;
+    },
+    []
+  );
 
-  private renderer?: Renderer;
-  private shouldRender = true;
-
-  private getRenderer() {
-    const { renderer } = this;
-
-    if (renderer) return renderer;
-
-    const newRenderer = this.context().createRenderer(this.props.scope);
-
-    this.renderer = newRenderer;
-
-    return newRenderer;
+  if (shouldRender.current) {
+    renderer.render(<Fragment key={id}>{children}</Fragment>);
   }
 
-  componentWillUnmount() {
-    this.shouldRender = false;
-
-    if (this.renderer) {
-      this.renderer.destroy();
-      delete this.renderer;
-    }
-  }
-
-  render() {
-    const { children } = this.props;
-
-    if (children !== null) {
-      if (!isValidElement(children)) {
-        throw new Error("[overlays] Invalid node type.");
-      }
-
-      if (!children.key) {
-        console.warn(
-          "[overlays] An overlay node is missing a key. Overlay nodes are rendered from arrays, so each node should have a key."
-        );
-      }
-    }
-
-    if (this.shouldRender) {
-      this.getRenderer().render(children);
-    }
-
-    return null;
-  }
+  return null;
 }

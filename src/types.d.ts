@@ -6,7 +6,7 @@ declare namespace Overlays {
     destroy(): void;
   }
   export type ContentPayload = {
-    createRenderer(scope?: string): Renderer;
+    createRenderer(key: string, scope?: string): Renderer;
   };
   export type RootPayload = {
     renderContent(scope?: string): ReactNode[];

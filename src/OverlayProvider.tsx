@@ -1,100 +1,132 @@
-import React, { PureComponent, ReactNode } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import nextTick from "next-tick";
 
 import { RootContext, ContentContext } from "./context";
 
 const DEFAULT_SCOPE = "@@OVERLAYS";
 
-type Content = Map<ContentId, ReactNode>;
-type ContentId = number;
+type OverlayKey = string;
+type Scope = string;
+type Content = Map<OverlayKey, ReactNode>;
 
-export class OverlayProvider extends PureComponent {
-  private idCounter = 0;
-  private content: Record<string, Content | void> = {};
+function createOverlayContexts(forceUpdate: () => void) {
+  const content: Record<Scope, Content | void> = {};
 
-  state = {
-    contentContext: this.createContentContext(),
-    rootContext: this.createRootContext()
-  };
-
-  private renderNode(
-    scope: string | undefined,
-    id: number,
-    content: ReactNode,
-    callback?: () => void
-  ) {
-    this.getScopedContent(scope).set(id, content);
-    nextTick(() => this.updateRootContext(callback));
-  }
-
-  private createRenderer = (scope?: string) => {
-    const id = ++this.idCounter;
-
-    let isDestroyed = false;
-
-    const render = (content: ReactNode) => {
-      if (isDestroyed) return;
-
-      this.renderNode(scope, id, content);
-    };
-
-    const destroy = () => {
-      if (isDestroyed) return;
-
-      isDestroyed = true;
-
-      this.renderNode(scope, id, null, () => {
-        this.getScopedContent(scope).delete(id);
-      });
-    };
-
-    return { render, destroy };
-  };
-
-  private getScopedContent(scope: string = DEFAULT_SCOPE) {
-    const scopedContent = this.content[scope];
+  function getScopedContent(scope: string = DEFAULT_SCOPE) {
+    const scopedContent = content[scope];
 
     if (scopedContent) return scopedContent;
 
-    const newScopedContent = new Map<number, ReactNode>();
+    const newScopedContent = new Map<OverlayKey, ReactNode>();
 
-    this.content[scope] = newScopedContent;
+    content[scope] = newScopedContent;
 
     return newScopedContent;
   }
 
-  private renderContent = (scope?: string) => {
-    return Array.from(this.getScopedContent(scope).values());
+  function renderContent(scope?: string) {
+    return Array.from(getScopedContent(scope).values());
+  }
+
+  function createRootContext() {
+    return () => ({ renderContent });
+  }
+
+  let rootContext = createRootContext();
+  let shouldUpdateRoots = false;
+
+  function effect() {
+    shouldUpdateRoots = true;
+
+    return () => {
+      shouldUpdateRoots = false;
+    };
+  }
+
+  function renderNode(
+    key: string,
+    scope: string | undefined,
+    overlayContent: ReactNode
+  ) {
+    getScopedContent(scope).set(key, overlayContent);
+
+    if (!shouldUpdateRoots) return;
+
+    nextTick(() => {
+      rootContext = createRootContext();
+      forceUpdate();
+    });
+  }
+
+  function createRenderer(key: string, scope?: string) {
+    let isDestroyed = false;
+
+    function render(overlayContent: ReactNode) {
+      if (isDestroyed) return;
+
+      renderNode(key, scope, overlayContent);
+    }
+
+    function destroy() {
+      if (isDestroyed) return;
+
+      isDestroyed = true;
+
+      renderNode(key, scope, null);
+      getScopedContent(scope).delete(key);
+    }
+
+    return { render, destroy };
+  }
+
+  const contentContext = () => ({ createRenderer });
+
+  function getRootContext() {
+    return rootContext;
+  }
+
+  function getContentContext() {
+    return contentContext;
+  }
+
+  return {
+    effect,
+    getContentContext,
+    getRootContext
   };
+}
 
-  private createContentContext() {
-    return () => ({
-      createRenderer: this.createRenderer
-    });
-  }
+function useForceUpdate() {
+  const setValue = useState(true)[1];
 
-  private createRootContext() {
-    return () => ({
-      renderContent: this.renderContent
-    });
-  }
+  return useCallback(() => setValue(value => !value), [setValue]);
+}
 
-  private updateRootContext(callback?: () => void) {
-    this.setState(
-      {
-        rootContext: this.createRootContext()
-      },
-      callback
-    );
-  }
+function useOverlayContexts() {
+  const forceUpdate = useForceUpdate();
+  const contexts = useMemo(() => createOverlayContexts(forceUpdate), [
+    forceUpdate
+  ]);
 
-  render() {
-    return (
-      <RootContext.Provider value={this.state.rootContext}>
-        <ContentContext.Provider value={this.state.contentContext}>
-          {this.props.children}
-        </ContentContext.Provider>
-      </RootContext.Provider>
-    );
-  }
+  useEffect(contexts.effect, []);
+
+  return contexts;
+}
+
+export function OverlayProvider(props: { children: ReactNode }) {
+  const { getRootContext, getContentContext } = useOverlayContexts();
+
+  return (
+    <RootContext.Provider value={getRootContext()}>
+      <ContentContext.Provider value={getContentContext()}>
+        {props.children}
+      </ContentContext.Provider>
+    </RootContext.Provider>
+  );
 }
