@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## v2.0.1
 
 - Transpile to ES5 with a library target of ES2015.
 
