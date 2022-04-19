@@ -1,16 +1,17 @@
-import { createContext } from "react";
+import { createContext, useContext } from "react";
+import type { OverlaysManager } from "./OverlaysManager";
 
-import { ContentValue, RootValue } from "./types";
+import { OverlaysContextValue } from "./types";
 
-function abstractGetContext(): any {
+function abstractGetContext(): OverlaysManager {
   throw new Error(
     "No context for overlays is available. Wrap your component tree inside `<OverlayProvider />`"
   );
 }
 
-export const ContentContext = createContext<ContentValue>(
-  abstractGetContext as ContentValue
-);
-export const RootContext = createContext<RootValue>(
-  abstractGetContext as RootValue
-);
+export const OverlaysContext =
+  createContext<OverlaysContextValue>(abstractGetContext);
+
+export function useOverlaysContext() {
+  return useContext(OverlaysContext)();
+}

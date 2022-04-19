@@ -1,18 +1,6 @@
-import React, { useContext, useMemo } from "react";
+import { useOverlaysContext } from "./context";
+import { OverlayRootProps } from "./types";
 
-import { RootContext } from "./context";
-
-type Props = {
-  scope?: string;
-};
-
-export function OverlayRoot(props: Props) {
-  const { scope } = props;
-  const rootContext = useContext(RootContext);
-  const overlays = useMemo(() => rootContext().renderContent(scope), [
-    rootContext,
-    scope
-  ]);
-
-  return <>{overlays}</>;
+export function OverlayRoot(props: OverlayRootProps) {
+  return useOverlaysContext().useRenderRoot(props);
 }
