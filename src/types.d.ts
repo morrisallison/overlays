@@ -1,18 +1,16 @@
-import { ReactNode } from "react";
+import { ReactElement } from "react";
+import type { OverlaysManager } from "./OverlaysManager";
 
 declare namespace Overlays {
-  export interface Renderer {
-    render(content: ReactNode): void;
-    destroy(): void;
+  export interface OverlayRootProps {
+    scope?: string;
   }
-  export type ContentPayload = {
-    createRenderer(key: string, scope?: string): Renderer;
-  };
-  export type RootPayload = {
-    renderContent(scope?: string): ReactNode[];
-  };
-  export type ContentValue = () => ContentPayload;
-  export type RootValue = () => RootPayload;
+  export interface OverlayProps {
+    children?: ReactElement | null;
+    id: string;
+    scope?: string;
+  }
+  export type OverlaysContextValue = () => OverlaysManager;
 }
 
 export = Overlays;
