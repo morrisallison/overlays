@@ -18,11 +18,11 @@ export class OverlaysManager {
 
   private content = new Map<Scope, Content | void>();
 
-  public useRenderOverlay({
+  public useUpdateOverlay({
     children,
     id,
     scope = DEFAULT_SCOPE,
-  }: OverlayProps): ReactNode {
+  }: OverlayProps) {
     this.updateOverlay({ children, id, scope });
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -31,12 +31,10 @@ export class OverlaysManager {
         this.removeOverlay(scope, id);
       };
     }, [id, scope]);
-
-    return null;
   }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  public useRenderRoot({ scope = DEFAULT_SCOPE }: OverlayRootProps): ReactNode {
+  public useRenderRoot({ scope = DEFAULT_SCOPE }: OverlayRootProps) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const forceUpdate = useForceUpdate();
 
