@@ -1,4 +1,10 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { OverlayProps, OverlayRootProps } from "./types";
 
 const DEFAULT_SCOPE = "@@OVERLAYS";
@@ -8,15 +14,15 @@ type Scope = string;
 type Content = Map<OverlayId, ReactNode>;
 
 function useForceUpdate() {
-  const setValue = useState(true)[1];
+  const [_value, setValue] = useState(0);
 
-  return useCallback(() => setValue((value) => !value), [setValue]);
+  return useCallback(() => setValue(Math.random), []);
 }
 
 export class OverlaysManager {
-  private rootUpdateHandlers = new Map<Scope, () => void>();
-
   private content = new Map<Scope, Content | void>();
+  private rootUpdateHandlers = new Map<Scope, () => void>();
+  private rootUpdatePending = new Map<Scope, boolean>();
 
   public useUpdateOverlay({
     children,
@@ -63,11 +69,36 @@ export class OverlaysManager {
   }
 
   private renderContent(scope: string) {
-    return Array.from(this.getScopedContent(scope).values());
+    const entries = Array.from(this.getScopedContent(scope).entries());
+    const jsx = entries.reduce<JSX.Element[]>((result, [id, children]) => {
+      return [...result, <Fragment key={id}>{children}</Fragment>];
+    }, []);
+
+    return <>{jsx}</>;
+  }
+
+  private getRootUpdateHandler(scope: Scope) {
+    return this.rootUpdateHandlers.get(scope);
+  }
+
+  private rootUpdateAllowed(scope: Scope) {
+    return (
+      !!this.getRootUpdateHandler(scope) && !this.rootUpdatePending.get(scope)
+    );
   }
 
   private triggerRootUpdate(scope: Scope) {
-    this.rootUpdateHandlers.get(scope)?.();
+    if (!this.rootUpdateAllowed(scope)) return;
+
+    this.rootUpdatePending.set(scope, true);
+
+    queueMicrotask(() => {
+      // The handler must be referenced inside `queueMicrotask`
+      // otherwise the handler may have been removed by the time
+      // `queueMicrotask` is called.
+      this.getRootUpdateHandler(scope)?.();
+      this.rootUpdatePending.set(scope, false);
+    });
   }
 
   private updateOverlay({ children, id, scope = DEFAULT_SCOPE }: OverlayProps) {
