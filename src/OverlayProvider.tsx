@@ -1,9 +1,11 @@
-import React, { ReactNode, useCallback, useMemo } from "react";
+import React, { memo, ReactNode, useCallback, useMemo } from "react";
 
 import { OverlaysContext } from "./context";
 import { OverlaysManager } from "./OverlaysManager";
 
-export function OverlayProvider(props: { children: ReactNode }) {
+export const OverlayProvider = memo(function OverlayProvider(props: {
+  children: ReactNode;
+}) {
   const manager = useMemo(() => new OverlaysManager(), []);
   const value = useCallback(() => manager, [manager]);
 
@@ -12,4 +14,4 @@ export function OverlayProvider(props: { children: ReactNode }) {
       {props.children}
     </OverlaysContext.Provider>
   );
-}
+});

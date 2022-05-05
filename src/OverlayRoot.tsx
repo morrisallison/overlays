@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { useOverlaysContext } from "./context";
 import { OverlayRootProps } from "./types";
 
-export function OverlayRoot(props: OverlayRootProps) {
+export const OverlayRoot = memo(function OverlayRoot(props: OverlayRootProps) {
   return useOverlaysContext().useRenderRoot(props);
-}
+});
